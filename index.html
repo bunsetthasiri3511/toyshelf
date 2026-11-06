@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toy Shelf</title>
+<style>
+:root{color-scheme:dark;--wood:#8a5a3b;--wood2:#5e3a24}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 35%,#3a2d5c,#1a1429 70%);color:#e6e0f5;font:14px system-ui,sans-serif;overflow-x:hidden}
+header{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:10px 16px}
+h1{font-size:18px;margin:0}
+button,label.btn{background:#5b4a96;color:#fff;border:0;border-radius:6px;padding:7px 12px;cursor:pointer;font:inherit}
+button:hover,label.btn:hover{background:#7060b4}button.sec{background:#3a3158}
+#stage{position:relative;perspective:1100px;display:flex;justify-content:center;padding:30px 0 60px;touch-action:none}
+#room{pointer-events:none;position:relative;width:min(720px,94vw);height:440px;transform-style:preserve-3d;transition:transform .15s}
+.p{position:absolute;pointer-events:auto}
+#back{left:0;top:0;width:100%;height:100%;transform:translateZ(-300px);
+ background:radial-gradient(ellipse at 50% 20%,#ffd9a033,#0000 60%),radial-gradient(circle,#ffffff0d 1.5px,#0000 2px) 0 0/14px 14px,repeating-linear-gradient(90deg,#5a4a82 0 30px,#4e4072 30px 60px)}
+#ceil{left:0;top:0;width:100%;height:300px;transform-origin:top;transform:rotateX(-90deg);background:linear-gradient(0deg,#2a2142,#1e1731)}
+.lights{position:absolute;left:0;right:0;top:10px;height:22px;display:flex;justify-content:space-around;pointer-events:none}
+.lights i{width:8px;height:8px;border-radius:50%;margin-top:calc(var(--d)*4px);background:var(--c);box-shadow:0 0 10px 4px var(--c);animation:tw 2.4s ease-in-out infinite;animation-delay:var(--t)}
+@keyframes tw{50%{opacity:.35}}
+.bay{position:absolute;left:10px;right:10px;height:128px;background:linear-gradient(#0003,#0000 40%,#0001);box-shadow:inset 0 6px 14px #0005;border-radius:3px;pointer-events:none}
+.win{position:absolute;left:80px;top:90px;width:140px;height:170px;border:9px solid #6b4329;border-radius:70px 70px 4px 4px;
+ background:radial-gradient(circle at 70% 30%,#fff 0 9px,#fff0 10px),linear-gradient(#142a55,#3b5a9a);box-shadow:inset 0 0 20px #0008,0 0 40px #9fc3ff55}
+.win::before,.win::after{content:"";position:absolute;background:#6b4329}.win::before{left:50%;top:0;bottom:0;width:6px;margin-left:-3px}.win::after{top:55%;left:0;right:0;height:6px}
+.poster{position:absolute;left:100px;top:110px;width:100px;height:130px;background:linear-gradient(135deg,#ff9bb3,#ffd66b);border:6px solid #f4eadb;box-shadow:3px 4px 8px #0006;display:grid;place-items:center;font-size:44px}
+.rug{position:absolute;left:14%;right:14%;top:12%;bottom:8%;border-radius:50%;background:radial-gradient(ellipse,#d96a8a 0 30%,#f4c26b 30% 38%,#b9477a 38% 62%,#f4eadb 62% 66%,#7a3f8f 66%);box-shadow:0 0 30px #0006;opacity:.92}
+.glow{position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,#9fc3ff40,#0000 60%);pointer-events:none}
+.toy::after{content:"";position:absolute;left:8%;right:8%;bottom:-4px;height:9px;background:radial-gradient(#000a,#0000 70%);z-index:-1}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;background:radial-gradient(ellipse at 50% 45%,#0000 60%,#0007)}
+#left,#right{top:0;width:300px;height:100%;background:linear-gradient(90deg,#41355f,#2b2342)}
+#left{left:0;transform-origin:left;transform:rotateY(90deg)}
+#right{right:0;transform-origin:right;transform:rotateY(-90deg);background:linear-gradient(270deg,#362c52,#2b2342)}
+#floor{left:0;top:100%;width:100%;height:300px;transform-origin:top;transform:rotateX(-90deg);background:linear-gradient(0deg,#0000,#0005),repeating-linear-gradient(90deg,#8a5a3b 0 60px,#74492b 60px 62px)}
+.board{position:absolute;left:-14px;right:-14px;height:14px;background:linear-gradient(#c58d62,#9a6a45 35%,var(--wood2));border-radius:2px;box-shadow:0 10px 12px #0007}
+.toy{position:absolute;cursor:grab;user-select:none;touch-action:none}
+.toy.sel{outline:2px dashed #ffd66b;outline-offset:3px}
+.toy img,.toy .sheet{display:block;image-rendering:pixelated;pointer-events:none}
+.toy .sheet{background:url(assets/robot.png) 0 0/400% 100%;animation:sheet .8s steps(4) infinite}
+@keyframes sheet{to{background-position:133.333% 0}}
+.bob>*{animation:bob 1.2s ease-in-out infinite}.sway>*{animation:sway 2s ease-in-out infinite;transform-origin:50% 100%}
+.breathe>*{animation:br 2.4s ease-in-out infinite;transform-origin:50% 100%}
+.bob>.sheet{animation:sheet .8s steps(4) infinite,bob 1.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}@keyframes sway{50%{transform:rotate(5deg)}0%,100%{transform:rotate(-5deg)}}
+@keyframes br{50%{transform:scale(1.05,.95)}}
+.dragging{animation:none!important;z-index:9;filter:drop-shadow(0 10px 6px #0008)}
+#bar{display:flex;gap:8px;justify-content:center;min-height:36px}
+dialog{background:#2a2345;color:inherit;border:1px solid #5b4a96;border-radius:10px}
+dialog input{display:block;width:260px;margin:8px 0;padding:8px;border-radius:6px;border:1px solid #5b4a96;background:#1d1830;color:inherit}
+#msg{text-align:center;color:#ffd66b;min-height:20px}
+</style></head><body>
+<header><h1>🧸 Toy Shelf</h1><div style="display:flex;gap:8px;align-items:center">
+<span id="who"></span><label class="btn">＋ อัพโหลดของเล่น<input id="file" type="file" accept="image/*" hidden></label>
+<button id="login" class="sec">เข้าสู่ระบบ</button></div></header>
+<div id="msg"></div>
+<div id="stage"><div id="room"><div id="back" class="p"></div><div id="left" class="p"><div class="poster">🧸</div></div><div id="right" class="p"><div class="win"></div></div><div id="ceil" class="p"></div><div id="floor" class="p"><div class="rug"></div></div></div></div>
+<div id="bar"></div>
+<dialog id="dlg"><form method="dialog"><b>เข้าสู่ระบบ / สมัครด้วยชื่อ + รหัสลับ</b>
+<input id="em" placeholder="ชื่อผู้ใช้ (a-z ตัวเลข _)" pattern="[A-Za-z0-9_]{3,20}" autocomplete="username" required><input id="pw" type="password" placeholder="รหัสลับ (6 ตัวขึ้นไป)" required minlength="6" autocomplete="current-password">
+<div style="display:flex;gap:8px"><button id="in" value="in">เข้าสู่ระบบ</button><button id="up" value="up" class="sec">สมัคร</button><button value="x" class="sec">ปิด</button></div></form></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+const cfg=window.TOYSHELF_CONFIG||{},$=s=>document.querySelector(s);
+const sb=cfg.url&&cfg.key&&window.supabase?supabase.createClient(cfg.url,cfg.key):null;
+const W=720,H=440,SH=[150,290,426],ANIMS=['bob','sway','breathe','none'];
+let user=null,toys=[],sel=null,back=$('#back');
+const say=t=>{$('#msg').textContent=t;if(t)setTimeout(()=>$('#msg').textContent==t&&($('#msg').textContent=''),4000)};
+SH.forEach(y=>{const a=document.createElement('div');a.className='bay';a.style.top=y-128+'px';back.append(a);
+  const b=document.createElement('div');b.className='board';b.style.top=y+'px';back.append(b)});
+const L=document.createElement('div');L.className='lights';
+['#ffd66b','#ff8fb0','#8fd3ff','#9dffb0'].forEach((c,k)=>{for(let i=0;i<5;i++){const e=document.createElement('i');
+  e.style.cssText=`--c:${c};--d:${[0,1,2,1,0][i]};--t:${(k*5+i)*.37%2.4}s`;L.append(e)}});back.append(L);
+const gl=document.createElement('div');gl.className='glow';back.append(gl);
+
+/* ---------- pixel art ---------- */
+async function pixelate(file){
+  const bmp=await createImageBitmap(file),N=cfg.pixelSize||56,k=N/Math.max(bmp.width,bmp.height);
+  const w=Math.max(2,Math.round(bmp.width*k)),h=Math.max(2,Math.round(bmp.height*k));
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingQuality='high';x.drawImage(bmp,0,0,w,h);
+  const d=x.getImageData(0,0,w,h),p=d.data,at=(a,b)=>(b*w+a)*4;
+  const cs=[[0,0],[w-1,0],[0,h-1],[w-1,h-1]].map(([a,b])=>at(a,b));
+  const bg=[0,1,2].map(i=>cs.reduce((s,o)=>s+p[o+i],0)/4);
+  const near=o=>Math.hypot(p[o]-bg[0],p[o+1]-bg[1],p[o+2]-bg[2])<55,seen=new Uint8Array(w*h),st=[];
+  for(let a=0;a<w;a++)st.push([a,0],[a,h-1]);for(let b=0;b<h;b++)st.push([0,b],[w-1,b]);
+  while(st.length){const[a,b]=st.pop();if(a<0||b<0||a>=w||b>=h||seen[b*w+a])continue;if(!near(at(a,b)))continue;
+    seen[b*w+a]=1;p[at(a,b)+3]=0;st.push([a+1,b],[a-1,b],[a,b+1],[a,b-1])}
+  const L=5;for(let i=0;i<p.length;i+=4)if(p[i+3]){for(let j=0;j<3;j++){let v=(p[i+j]-128)*1.15+128;p[i+j]=Math.round(Math.max(0,Math.min(255,v))/255*L)/L*255}p[i+3]=255}
+  const out=new Uint8ClampedArray(p);  // outline
+  for(let b=0;b<h;b++)for(let a=0;a<w;a++)if(!p[at(a,b)+3]&&[[1,0],[-1,0],[0,1],[0,-1]].some(([u,v])=>p[at(a+u,b+v)+3]&&a+u>=0&&a+u<w&&b+v>=0&&b+v<h)){const o=at(a,b);out[o]=out[o+1]=out[o+2]=25;out[o+3]=255}
+  x.putImageData(new ImageData(out,w,h),0,0);return c}
+const blob=(c,t='image/png',q)=>new Promise(r=>c.toBlob(r,t,q));
+async function resized(file){const b=await createImageBitmap(file),k=Math.min(1,1024/Math.max(b.width,b.height)),c=document.createElement('canvas');
+  c.width=b.width*k;c.height=b.height*k;c.getContext('2d').drawImage(b,0,0,c.width,c.height);return blob(c,'image/jpeg',.85)}
+
+/* ---------- render ---------- */
+function render(){back.querySelectorAll('.toy').forEach(e=>e.remove());toys.forEach(mk)}
+function mk(t){
+  const el=document.createElement('div');el.className='toy '+t.anim;t.el=el;
+  if(t.sheet){el.innerHTML='<div class="sheet" style="width:117px;height:107px"></div>';t.w=117;t.h=107}
+  else{const i=new Image();i.src=t.src;i.onload=()=>{const s=110/Math.max(i.naturalWidth,i.naturalHeight);t.w=i.naturalWidth*s;t.h=i.naturalHeight*s;
+    i.style.width=t.w+'px';i.style.height=t.h+'px';place(t)};el.append(i)}
+  el.onpointerdown=e=>drag(e,t);back.append(el);if(t.w)place(t)}
+function place(t){t.el.style.left=t.x*(W-t.w)+'px';t.el.style.top=SH[t.shelf]-t.h+'px'}
+function drag(e,t){
+  e.preventDefault();select(t);const el=t.el,r=back.getBoundingClientRect(),s=r.width/W;el.classList.add('dragging');el.setPointerCapture(e.pointerId);
+  const ox=e.offsetX*1,oy=e.offsetY*1;
+  const mv=ev=>{el.style.left=(ev.clientX-r.left)/s-t.w/2+'px';el.style.top=(ev.clientY-r.top)/s-t.h/2+'px'};
+  const up=ev=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.classList.remove('dragging');
+    const cy=(ev.clientY-r.top)/s+t.h/2;t.shelf=SH.reduce((b,y,i)=>Math.abs(y-cy)<Math.abs(SH[b]-cy)?i:b,0);
+    t.x=Math.max(0,Math.min(1,((ev.clientX-r.left)/s-t.w/2)/(W-t.w)));place(t);save(t)};
+  el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)}
+function select(t){sel=t;toys.forEach(o=>o.el.classList.toggle('sel',o===t));
+  $('#bar').innerHTML=`<b>${t.name}</b><button id="an">ท่าทาง: ${t.anim}</button>`+(t.local?'':'<button id="rm" class="sec">ลบ</button>');
+  $('#an').onclick=()=>{t.anim=ANIMS[(ANIMS.indexOf(t.anim)+1)%4];t.el.className='toy sel '+t.anim;select(t);save(t)};
+  if($('#rm'))$('#rm').onclick=()=>remove(t)}
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.toy,#bar')){sel=null;$('#bar').innerHTML='';toys.forEach(o=>o.el.classList.remove('sel'))}});
+
+/* ---------- data ---------- */
+const starter=()=>{const s=JSON.parse(localStorage.getItem('starter')||'{}');
+  return{id:'starter',name:'หุ่นตัวอย่าง',sheet:true,local:true,shelf:s.shelf??1,x:s.x??.5,anim:s.anim||'bob'}};
+async function save(t){
+  if(t.id==='starter')return localStorage.setItem('starter',JSON.stringify({shelf:t.shelf,x:t.x,anim:t.anim}));
+  if(sb&&user&&!t.local)await sb.from('toys').update({shelf:t.shelf,x:t.x,anim:t.anim}).eq('id',t.id)}
+async function load(){
+  toys=[starter()];
+  if(sb&&user){const{data,error}=await sb.from('toys').select('*').order('created_at');
+    if(error)say('โหลดไม่สำเร็จ: '+error.message);
+    (data||[]).forEach(r=>toys.push({...r,src:sb.storage.from('toys').getPublicUrl(r.pixel_path).data.publicUrl}))}
+  render()}
+async function remove(t){
+  if(!confirm('ลบ '+t.name+' ?'))return;
+  if(sb&&user&&!t.local){await sb.storage.from('toys').remove([t.pixel_path,t.original_path].filter(Boolean));await sb.from('toys').delete().eq('id',t.id)}
+  toys=toys.filter(o=>o!==t);t.el.remove();sel=null;$('#bar').innerHTML=''}
+$('#file').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  if(sb&&!user)return say('กรุณาเข้าสู่ระบบก่อนอัพโหลด');
+  say('กำลังแปลงเป็น pixel art…');
+  try{const c=await pixelate(f),t={name:f.name.replace(/\.[^.]+$/,'').slice(0,20),shelf:0,x:Math.random(),anim:'bob',src:c.toDataURL()};
+    if(sb&&user){const id=crypto.randomUUID(),pp=`${user.id}/${id}.png`,op=`${user.id}/${id}-orig.jpg`;
+      const a=await sb.storage.from('toys').upload(pp,await blob(c),{contentType:'image/png'});if(a.error)throw a.error;
+      await sb.storage.from('toys').upload(op,await resized(f),{contentType:'image/jpeg'});
+      const{data,error}=await sb.from('toys').insert({name:t.name,pixel_path:pp,original_path:op,shelf:0,x:t.x,anim:'bob'}).select().single();if(error)throw error;
+      Object.assign(t,data)}else{t.id='l'+Date.now();t.local=true}
+    toys.push(t);mk(t);say('เพิ่มของเล่นแล้ว! ลากไปวางบนชั้นได้เลย')}catch(err){say('ผิดพลาด: '+(err.message||err))}};
+
+/* ---------- auth ---------- */
+async function auth(kind){
+  const cred={email:$('#em').value.trim().toLowerCase()+'@toyshelf.app',password:$('#pw').value};
+  const{error}=kind==='up'?await sb.auth.signUp(cred):await sb.auth.signInWithPassword(cred);
+  if(error)say(error.message);else if(kind==='up')say('สมัครแล้ว กด "เข้าสู่ระบบ" ได้เลย')}
+$('#login').onclick=()=>{if(!sb)return say('โหมดเดโม: ใส่ค่า Supabase ใน config.js เพื่อเปิดระบบล็อกอิน');
+  if(user)sb.auth.signOut();else $('#dlg').showModal()};
+$('#in').onclick=e=>{e.preventDefault();auth('in');$('#dlg').close()};$('#up').onclick=e=>{e.preventDefault();auth('up');$('#dlg').close()};
+if(sb)sb.auth.onAuthStateChange((_,s)=>{user=s?.user||null;$('#who').textContent=user?'👤 '+user.email.split('@')[0]:'';$('#login').textContent=user?'ออกจากระบบ':'เข้าสู่ระบบ';load()});
+else{$('#who').textContent='โหมดเดโม';load()}
+
+/* ---------- parallax ---------- */
+const room=$('#room');
+addEventListener('pointermove',e=>{if(e.target.closest('.toy.dragging'))return;
+  const rx=(e.clientX/innerWidth-.5)*14,ry=(e.clientY/innerHeight-.5)*-6;room.style.transform=`rotateY(${rx}deg) rotateX(${ry}deg)`});
+</script></body></html>
